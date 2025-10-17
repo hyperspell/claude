@@ -51,13 +51,12 @@ export async function getUserToken() {
 
 export async function search(query: string, answer: boolean = true) {
     const userId = ... // Write code to get the ID of the currently logged in user here — you might have to import other modules
-    const sources = <PROVIDERS>;
-    const hyperspell = new Hyperspell({ apiKey: process.env.HYPERSPELL_API_KEY, userId: userId });
+    const hyperspell = new Hyperspell({ apiKey: process.env.HYPERSPELL_API_KEY, userID: userId });
 
     const response = await hyperspell.memories.search({
         query,
-        sources,
-        answer
+        answer,
+        sources = <PROVIDERS>;
     });
     return response.answer;
 }

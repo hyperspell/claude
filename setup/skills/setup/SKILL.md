@@ -59,7 +59,7 @@ Then, ask the user how they want to ingest memories. Offer this multiple choice 
 - I want to connect my user's accounts automatically
 - I want to add memories directly (upload files or conversations)
 
-Based on their choice, follow the instructions in ./MANUAL-MEMORIES.md or  ./AUTOMATIC-MEMORIES.md 
+Based on their choice, follow the instructions in ./connect_memories.md or  ./upload_memories_directly.md 
 
 ### Step 4: Asking how the user wants to use memories
 
@@ -69,13 +69,10 @@ Display the following message to your user:
 Now that we've created a way to get new memories into Hyperspell, we also need to access them at the right time to give your app the necessary context. Let me analyse your code base and determine the best way to do so.
 ```
 
-Depending on the nature of this project, there are different ways to use Hyperspell:
+Depending on the nature of this project, there are different ways to use Hyperspell. Determine if this project is using a third party SDK to manage their core agent loops and follow the appropriate instructions:
 
-* For chat apps, Hyperspell can be used as an explicit step to retrieve additional context based on the user's input and pass it to the LLM call
-* For agents (or projects that use existing agent SDKs) that support tool calling, Hyperspell can be used as a tool to retrieve memories and context.
-
-Analyse the project's code base to determine the appropriate way to integrate hyperspell into this project. Based on that, follow the instructions in ./EXPLICIT-SEARCH.md or ./AGENT-SEARCH.md
-
+- For the Vercel AI sdk (the `ai` package in package.json), follow the instructions in ./vercel_ai_sdk.md
+- If this project is not using any third-party SDKs, follow the instructions in ./no_sdk.md
 
 ## Step 5: Wrapping up
 
