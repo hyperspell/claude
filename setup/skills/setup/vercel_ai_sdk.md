@@ -11,15 +11,14 @@ import { tool } from "ai";
 import { z } from 'zod';
 import { search } from "@/app/actions/hyperspell"; 
 
-const hyperspell = tool({
-  name: "hyperspell",
-  description: "Search connected memories for information",
+const memories = tool({
+  name: "memories",
+  description: "Search connected memories for information. ALWAYS use this before answering the user's question.",
   inputSchema: z.object({
-    query: z.string().describe("The query to search for"),
+    query: z.string().describe("The query to search for. Formulate it as a question."),
   }),
   execute: async ({ query }) => {
-    const searchResult = await search(query, true);
-    return searchResult;
+    return await search(query, true);
   },
 })
 ```
@@ -34,7 +33,8 @@ The agent is typically called with either the `streamText` or `generateText` met
 streamText({
     model: openai("gpt-5-nano"),
     messages,
-    tools: { hyperspell }, // add hyperspell as a new entry if there are already existing tools
+    tools: { memories }, // add hyperspell as a new entry if there are already existing tools
+    stopWhen: stepCountIs(5), // if this is already present and greater than 5, don't change it
 });
 ```
 
