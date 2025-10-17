@@ -1,0 +1,8 @@
+{
+    "name": "setup",
+    "description": "Custom skills and plugins that lets you integrate Hyperspell into your code project.",
+    "version": "1.0.0",
+    "author": {
+        "name": "Hyperspell"
+    }
+}

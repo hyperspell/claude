@@ -1,0 +1,13 @@
+{
+    "name": "hyperspell",
+    "owner": {
+        "name": "Hyperspell"
+    },
+    "plugins": [
+        {
+            "name": "setup",
+            "source": "./setup",
+            "description": "Custom skills and commands that integrate Hyperspell into your project."
+        }
+    ]
+}
