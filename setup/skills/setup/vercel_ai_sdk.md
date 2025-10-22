@@ -27,15 +27,17 @@ Adjust the import path for the `search` function to match the place you create t
 
 ## Add the hyperspell tool to the agent
 
-The agent is typically called with either the `streamText` or `generateText` methods from the `ai` package. Find that call, Import the hyperspell tool if it's not in the same file, and add the `tools` parameter like this:
+The agent is typically called with either the `streamText` or `generateText` methods from the `ai` package. Find that call, Import the hyperspell tool if it's not in the same file, and add the `tools` parameter like this.
 
 ```typescript
 streamText({
     model: openai("gpt-5-nano"),
     messages,
     tools: { memories }, // add hyperspell as a new entry if there are already existing tools
-    stopWhen: stepCountIs(5), // if this is already present and greater than 5, don't change it
+    stopWhen: stepCountIs(5), 
 });
 ```
+
+Make sure that `stopWhen` is set and has a stepCount of at least 5 — if it is already set to a higher number, don't change it.
 
 Done.
