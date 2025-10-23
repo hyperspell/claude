@@ -20,7 +20,7 @@
     ```
     /plugin install setup@hyperspell
     ```
-3. Run the `/hype` command to get started. If you already have a Hyperspell API key, you can provide it with `/hype YOUR-API-KEY`, otherwise Claude will help you create one.
+3. Run the `/setup:hype [HYPERSPELL-API-KEY]` command to get started. 
 
 ## Development
 
