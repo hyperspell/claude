@@ -37,7 +37,7 @@ import { searchMemories } from '@/app/actions/hyperspell';
 
 export const memories = tool({
   description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
-  parameters: z.object({
+  inputSchema: z.object({
     query: z.string().describe('The search query. Formulate it as a question for best results.'),
   }),
   execute: async ({ query }) => {
@@ -56,7 +56,7 @@ import { z } from 'zod';
 
 export const memories = tool({
   description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
-  parameters: z.object({
+  inputSchema: z.object({
     query: z.string().describe('The search query. Formulate it as a question for best results.'),
   }),
   execute: async ({ query }) => {
@@ -79,7 +79,7 @@ Find where you call `streamText` or `generateText` and add the memories tool:
 ### With streamText (Streaming)
 
 ```typescript
-import { streamText } from 'ai';
+import { streamText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { memories } from '@/lib/tools/memories';
 
@@ -90,14 +90,14 @@ const result = await streamText({
     memories,
     // ... other tools you may have
   },
-  maxSteps: 5, // Allow enough steps for tool use
+  stopWhen: stepCountIs(5), // Allow enough steps for tool use
 });
 ```
 
 ### With generateText (Non-streaming)
 
 ```typescript
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { memories } from '@/lib/tools/memories';
 
@@ -107,7 +107,7 @@ const result = await generateText({
   tools: {
     memories,
   },
-  maxSteps: 5,
+  stopWhen: stepCountIs(5),
 });
 ```
 
@@ -117,9 +117,8 @@ Here's a complete example for a Next.js App Router API route:
 
 ```typescript
 // app/api/chat/route.ts
-import { streamText } from 'ai';
+import { streamText, stepCountIs, tool } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { tool } from 'ai';
 import { z } from 'zod';
 import Hyperspell from 'hyperspell';
 import { auth } from '@/lib/auth';
@@ -133,7 +132,7 @@ export async function POST(req: Request) {
   // Create the memories tool with user context
   const memories = tool({
     description: 'Search connected memories for information. Use this before answering questions that might require personal or work data.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('The search query as a question'),
     }),
     execute: async ({ query }) => {
@@ -158,7 +157,7 @@ When the user asks questions that might be answered by their emails,
 documents, or messages, use the memories tool to search for relevant information.`,
     messages,
     tools: { memories },
-    maxSteps: 5,
+    stopWhen: stepCountIs(5),
   });
 
   return result.toDataStreamResponse();
@@ -167,18 +166,20 @@ documents, or messages, use the memories tool to search for relevant information
 
 ## Important Configuration
 
-### maxSteps
+### stopWhen
 
-Always set `maxSteps` to at least 5 (or higher if you have complex tool chains):
+Always set `stopWhen` to allow enough steps for tool use (at least 5, or higher for complex tool chains):
 
 ```typescript
+import { stepCountIs } from 'ai';
+
 streamText({
   // ...
-  maxSteps: 5,  // Required for tool use
+  stopWhen: stepCountIs(5),  // Required for tool use
 });
 ```
 
-If `maxSteps` is already set higher, don't reduce it.
+If `stopWhen` is already set to a higher step count, don't reduce it.
 
 ### Tool Choice
 
@@ -201,6 +202,7 @@ streamText({
 If you already have tools, add memories alongside them:
 
 ```typescript
+import { streamText, stepCountIs } from 'ai';
 import { memories } from '@/lib/tools/memories';
 import { calculator } from '@/lib/tools/calculator';
 import { webSearch } from '@/lib/tools/webSearch';
@@ -213,7 +215,7 @@ streamText({
     calculator,
     webSearch,
   },
-  maxSteps: 10,  // Increase for more complex interactions
+  stopWhen: stepCountIs(10),  // Increase for more complex interactions
 });
 ```
 
@@ -221,7 +223,7 @@ streamText({
 
 ### Tool not being called
 - Check that the tool description clearly explains when to use it
-- Verify `maxSteps` is set high enough
+- Verify `stopWhen` step count is high enough
 - Add explicit instructions in your system prompt
 
 ### Search returning empty
