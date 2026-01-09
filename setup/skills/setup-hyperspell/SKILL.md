@@ -54,7 +54,7 @@ If this project contains an `.env.example`, also put a dummy key in there (`HYPE
 
 ### Step 3: Detect Project Type
 
-Follow the instructions in `./detection/detect_project.md` to analyze the codebase and determine:
+Follow the instructions in [detect_project.md](detection/detect_project.md) to analyze the codebase and determine:
 - **Repo type**: Backend, Frontend-only, or Monorepo/Fullstack
 - **Language**: TypeScript/JavaScript or Python
 - **Framework**: Next.js (App/Pages Router), Express, FastAPI, SPA, etc.
@@ -99,12 +99,12 @@ Based on the user's choice in Step 4 and the detection results from Step 3, dete
 ### Step 6: Set Up Memory Ingestion
 
 **For OAuth flows (FLOW A or B):**
-1. Follow instructions in `./memories/connect_oauth.md` for SDK initialization
-2. Then follow `./frameworks/SKILL.md` to set up the framework-specific token endpoint and connect button
+1. Follow instructions in [connect_oauth.md](memories/connect_oauth.md) for SDK initialization
+2. Then follow [index.md](frameworks/index.md) to set up the framework-specific token endpoint and connect button
 
 **For Direct memory flows (FLOW C or D):**
-1. Follow instructions in `./memories/direct/SKILL.md` to set up memory operations
-2. If FLOW D (frontend-only), also follow `./frameworks/frontend_only.md` for token setup
+1. Follow instructions in [index.md](memories/direct/index.md) to set up memory operations
+2. If FLOW D (frontend-only), also follow [frontend_only.md](frameworks/frontend_only.md) for token setup
 
 ### Step 7: Set Up Memory Search (SDK Integration)
 
@@ -138,7 +138,7 @@ How would you like to integrate Hyperspell's memory search?
 
 **Important:** Do not use "Direct search with AI answer" to replace an existing AI call if that call relies on other tools - those tools cannot be passed to the Hyperspell API.
 
-Follow instructions in `./sdks/SKILL.md` to implement the chosen pattern.
+Follow instructions in [index.md](sdks/index.md) to implement the chosen pattern.
 
 ### Step 8: Wrapping Up
 

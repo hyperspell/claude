@@ -27,11 +27,11 @@ Note the `provider` names returned (e.g., `gmail`, `slack`, `google_drive`). You
 
 Your backend needs to generate user tokens. The implementation depends on your framework:
 
-- **Next.js App Router** → See `../frameworks/nextjs_app_router.md`
-- **Next.js Pages Router** → See `../frameworks/nextjs_pages_router.md`
-- **Express.js** → See `../frameworks/express.md`
-- **FastAPI** → See `../frameworks/fastapi.md`
-- **Other frameworks** → See `../frameworks/SKILL.md` for adaptation guidance
+- **Next.js App Router** → See [nextjs_app_router.md](../frameworks/nextjs_app_router.md)
+- **Next.js Pages Router** → See [nextjs_pages_router.md](../frameworks/nextjs_pages_router.md)
+- **Express.js** → See [express.md](../frameworks/express.md)
+- **FastAPI** → See [fastapi.md](../frameworks/fastapi.md)
+- **Other frameworks** → See [index.md](../frameworks/index.md) for adaptation guidance
 
 The basic pattern is:
 

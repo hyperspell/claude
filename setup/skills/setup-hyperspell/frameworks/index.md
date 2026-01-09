@@ -9,7 +9,7 @@ This guide helps you set up Hyperspell integration for your specific framework. 
 | A | Monorepo/Fullstack + OAuth | Backend token endpoint + Frontend connect button |
 | B | Backend-only + OAuth | Backend token endpoint + Serve connect page |
 | C | Backend + Direct | X-As-User header pattern (no endpoints needed) |
-| D | Frontend-only | External token endpoint (see `frontend_only.md`) |
+| D | Frontend-only | External token endpoint (see [frontend_only.md](frontend_only.md)) |
 
 ## Framework Routing
 
@@ -17,21 +17,21 @@ Based on the detected framework, follow the appropriate guide:
 
 ### JavaScript/TypeScript Frameworks
 
-- **Next.js App Router** → `./nextjs_app_router.md`
-- **Next.js Pages Router** → `./nextjs_pages_router.md`
-- **Express.js** → `./express.md`
+- **Next.js App Router** → [nextjs_app_router.md](nextjs_app_router.md)
+- **Next.js Pages Router** → [nextjs_pages_router.md](nextjs_pages_router.md)
+- **Express.js** → [express.md](express.md)
 - **Fastify** → Adapt from Express pattern (similar middleware approach)
 - **NestJS** → Adapt from Express pattern (use decorators and services)
 
 ### Python Frameworks
 
-- **FastAPI** → `./fastapi.md`
+- **FastAPI** → [fastapi.md](fastapi.md)
 - **Flask** → Adapt from FastAPI pattern (use blueprints instead of routers)
 - **Django** → Adapt from FastAPI pattern (use views and URL patterns)
 
 ### Frontend-only (SPA)
 
-- **React/Vue/Svelte SPA** → `./frontend_only.md`
+- **React/Vue/Svelte SPA** → [frontend_only.md](frontend_only.md)
 
 ## Adaptation Guidance
 
@@ -73,7 +73,7 @@ No new endpoints needed - just call Hyperspell directly from your backend code.
 
 ### For Frontend-only (D)
 
-See `./frontend_only.md` for handling the special case where you have no backend.
+See [frontend_only.md](frontend_only.md) for handling the special case where you have no backend.
 
 ## Common Patterns Across Frameworks
 

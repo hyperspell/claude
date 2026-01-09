@@ -9,13 +9,13 @@ Use this tool-based approach when:
 - You want the AI to decide when to search memories
 - You have other tools alongside Hyperspell
 
-If you want Hyperspell to directly answer questions (without going through your AI), see `./raw_api.md` for the direct search patterns.
+If you want Hyperspell to directly answer questions (without going through your AI), see [raw_api.md](raw_api.md) for the direct search patterns.
 
 ## Prerequisites
 
 Make sure you have:
 1. The Vercel AI SDK installed (`npm i ai`)
-2. Hyperspell server actions or API routes set up (see `../frameworks/` guides)
+2. Hyperspell server actions or API routes set up (see [frameworks](../frameworks/index.md) guides)
 3. Zod installed (`npm i zod`)
 
 ## Create the Memories Tool

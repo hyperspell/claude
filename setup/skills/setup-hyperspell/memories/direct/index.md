@@ -23,9 +23,9 @@ Offer a multiple choice menu:
 - All of the above
 
 Based on their choice, follow the appropriate instructions:
-- Add memories → `./add_memories.md`
-- Upload files → `./upload_files.md`
-- List memories → `./list_memories.md`
+- Add memories → [add_memories.md](add_memories.md)
+- Upload files → [upload_files.md](upload_files.md)
+- List memories → [list_memories.md](list_memories.md)
 - All → Follow all three files in sequence
 
 ## Auth Setup for Direct Memory Operations
@@ -40,7 +40,7 @@ Before implementing any operation, ensure the auth pattern is set up correctly b
 **FLOW D (Frontend-only):**
 - Need to fetch user token from external endpoint first
 - Use that token for Hyperspell API calls
-- See `../frameworks/frontend_only.md` for token setup
+- See [frontend_only.md](../frameworks/frontend_only.md) for token setup
 
 ## TypeScript SDK Setup
 

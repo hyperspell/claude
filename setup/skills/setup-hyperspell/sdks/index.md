@@ -71,8 +71,8 @@ How would you like to integrate Hyperspell's memory search?
 
 Based on the detected AI SDK and chosen pattern:
 
-- **Vercel AI SDK** (`ai` package) → `./vercel_ai.md`
-- **No SDK / Direct API** → `./raw_api.md`
+- **Vercel AI SDK** (`ai` package) → [vercel_ai.md](vercel_ai.md)
+- **No SDK / Direct API** → [raw_api.md](raw_api.md)
 - **Other SDKs** (LangChain, LlamaIndex, etc.) → See Adaptation Guidance below
 
 ## Search Function Template
