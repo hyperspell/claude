@@ -8,6 +8,8 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, TodoWrite, AskUserQuestion
 
 ## Instructions
 
+**IMPORTANT: The flow labels (A, B, C, D) are internal implementation details. NEVER mention "Flow A", "Flow B", etc. to the user.** When communicating with the user, explain what you're doing in plain English (e.g., "I'll set up a token endpoint on your backend and add a connect button to your frontend" instead of "Using Flow A").
+
 Copy this checklist and track your progress:
 
 ```
@@ -158,7 +160,7 @@ Congratulations! You've successfully integrated Hyperspell in just <DURATION> mi
 This is just the beginning of your journey with Hyperspell. As your project grows, Hyperspell grows with you. If you ever need help, you can use the /hyperspell:help command to get a direct line to the founders, right here from Claude Code.
 ```
 
-## Auth Flow Reference
+## Auth Flow Reference (Internal Only - Do Not Share With User)
 
 | Flow | Scenario | Auth Method |
 |------|----------|-------------|
@@ -166,3 +168,5 @@ This is just the beginning of your journey with Hyperspell. As your project grow
 | B | Backend-only + OAuth | Backend token endpoint → Serve connect page |
 | C | Backend + Direct | API key + X-As-User header |
 | D | Frontend-only | External token endpoint required |
+
+Remember: These labels are for your internal tracking only. Explain the approach to users in plain terms.
