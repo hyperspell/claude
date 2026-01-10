@@ -56,6 +56,7 @@ import { z } from 'zod';
 
 export const memories = tool({
   description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
+  // IMPORTANT: starting from AI SDK 5.0, you MUST use inputSchema instead of parameters 
   inputSchema: z.object({
     query: z.string().describe('The search query. Formulate it as a question for best results.'),
   }),
@@ -71,8 +72,6 @@ export const memories = tool({
   },
 });
 ```
-
-**IMPORTANT**: Follow the exact implementation above, do not use different arguments. Define tools exactly as show above.
 
 ## Add the Tool to Your Agent
 
