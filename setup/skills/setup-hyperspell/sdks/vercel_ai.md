@@ -72,6 +72,8 @@ export const memories = tool({
 });
 ```
 
+**IMPORTANT**: Follow the exact implementation above, do not use different arguments. Define tools exactly as show above.
+
 ## Add the Tool to Your Agent
 
 Find where you call `streamText` or `generateText` and add the memories tool:
