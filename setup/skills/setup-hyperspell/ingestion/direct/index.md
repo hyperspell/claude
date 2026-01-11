@@ -2,37 +2,26 @@
 
 This guide helps you add memories programmatically to Hyperspell - useful for tracking conversations, uploading documents, or ingesting data from custom sources.
 
-**Important:** The guides below create **internal helper functions** that you call from your existing code. Do NOT create new API endpoints for these operations - instead, call these helpers from wherever you need them (e.g., after a chat response, when processing an uploaded file, in a background job). If there are no obvious places to integrate these helpers, then once you have completed the entire setup flow, then at the end, provide some next steps for the user about where these helpers are located and when/how to use them.
+## Instructions
 
-## Available Operations
+Create helper functions for all three memory operations:
 
-Display the following to the user:
+1. **Add memories** - Follow [add.md](add.md)
+2. **Upload files** - Follow [upload.md](upload.md)
+3. **List memories** - Follow [list.md](list.md)
 
-```
-You've chosen to add memories directly. Hyperspell provides several ways to manage memories programmatically:
+Place these helpers in an appropriate location (e.g., `lib/hyperspell.ts`, `utils/memories.ts`, or similar).
 
-1. **Add memories** - Add text content (conversations, documents, notes)
-2. **Upload files** - Upload files for automatic processing
-3. **List memories** - View and manage existing memories
+**Important:** These are **internal helper functions** - do NOT create new API endpoints. After creating the helpers:
 
-Which operation would you like to set up?
-```
+1. Look for obvious places in the codebase to integrate them:
+   - After chat/conversation responses → call `addMemory()`
+   - In existing file upload handlers → call `uploadFile()`
+   - In admin/dashboard pages → call `listMemories()`
 
-Offer a multiple choice menu:
-- Add memories (text content, conversations)
-- Upload files
-- List/manage memories
-- All of the above
+2. If there are no obvious integration points, note in your wrap-up message where the helpers are located and when the user should call them.
 
-Based on their choice, follow the appropriate instructions:
-- Add memories → [add.md](add.md)
-- Upload files → [upload.md](upload.md)
-- List memories → [list.md](list.md)
-- All → Follow all three files in sequence
-
-## Auth Setup for Direct Memory Operations
-
-Before implementing any operation, ensure the auth pattern is set up correctly:
+## Auth Setup
 
 **Backend apps (most common):**
 - Use API key from environment variable
@@ -42,12 +31,11 @@ Before implementing any operation, ensure the auth pattern is set up correctly:
 **Frontend-only apps:**
 - Need to fetch user token from a backend endpoint first
 - Your backend calls Hyperspell's `/auth/user_token` endpoint to generate tokens
-- Use that token for Hyperspell API calls from the frontend
-- See the token endpoint examples in [oauth.md](../oauth.md) for how to create the backend endpoint
+- See the token endpoint examples in [oauth.md](../oauth.md)
 
-## TypeScript SDK Setup
+## SDK Setup
 
-For TypeScript/JavaScript projects, the Hyperspell SDK provides typed methods:
+### TypeScript
 
 ```typescript
 import Hyperspell from 'hyperspell';
@@ -57,16 +45,9 @@ const hyperspell = new Hyperspell({
   apiKey: process.env.HYPERSPELL_API_KEY!,
   userID: userId  // The ID of the user whose memories these are
 });
-
-// For frontend - use user token
-const hyperspell = new Hyperspell({
-  apiKey: userToken  // Token fetched from your backend or auth provider
-});
 ```
 
-## Python SDK Setup
-
-For Python projects:
+### Python
 
 ```python
 from hyperspell import Hyperspell
@@ -77,14 +58,4 @@ hyperspell = Hyperspell(
     api_key=os.environ["HYPERSPELL_API_KEY"],
     user_id=user_id  # The ID of the user whose memories these are
 )
-
-# For frontend/scripts - use user token
-hyperspell = Hyperspell(api_key=user_token)
 ```
-
-## Common Use Cases
-
-- **Conversation tracking**: Add each message or conversation summary as a memory
-- **Document ingestion**: Upload PDFs, Word docs, or text files
-- **Knowledge base**: Add FAQ entries, documentation, or reference materials
-- **Activity logging**: Track user activities that should be searchable later
