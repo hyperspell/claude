@@ -155,7 +155,10 @@ How would you like to integrate Hyperspell's memory search?
 
 **Important:** Do not use "Direct search with AI answer" to replace an existing AI call if that call relies on other tools - those tools cannot be passed to the Hyperspell API.
 
-Follow instructions in [index.md](search/index.md) to implement the chosen pattern.
+**Based on the user's choice, follow the appropriate section in [index.md](search/index.md):**
+- "As a tool" → Create the search helper, then follow the tool integration for their SDK (Vercel AI, OpenAI, Anthropic, etc.)
+- "Direct search with AI answer" → Create the search helper only, call it with `answer: true` from existing code. Do NOT create a tool wrapper.
+- "Direct search for context only" → Create the search helper only, call it with `answer: false` from existing code. Do NOT create a tool wrapper.
 
 ### Step 7: Wrapping Up
 
