@@ -101,12 +101,13 @@ Based on the user's choice in Step 4 and the detection results from Step 3, dete
 ### Step 6: Set Up Memory Ingestion
 
 **For OAuth flows (FLOW A or B):**
-1. Follow instructions in [connect_oauth.md](memories/connect_oauth.md) for SDK initialization
-2. Then follow [index.md](frameworks/index.md) to set up the framework-specific token endpoint and connect button
+Follow the instructions in [oauth.md](ingestion/oauth.md) to:
+1. Create a token endpoint on your backend
+2. Add the connect button to your frontend (or redirect from backend for backend-only projects)
 
 **For Direct memory flows (FLOW C or D):**
-1. Follow instructions in [index.md](memories/direct/index.md) to set up memory operations
-2. If FLOW D (frontend-only), also follow [frontend_only.md](frameworks/frontend_only.md) for token setup
+1. Follow instructions in [index.md](ingestion/direct/index.md) to set up memory operations
+2. If frontend-only, you'll need a backend endpoint to generate user tokens - see the token endpoint examples in [oauth.md](ingestion/oauth.md)
 
 ### Step 7: Set Up Memory Search (SDK Integration)
 
@@ -140,7 +141,7 @@ How would you like to integrate Hyperspell's memory search?
 
 **Important:** Do not use "Direct search with AI answer" to replace an existing AI call if that call relies on other tools - those tools cannot be passed to the Hyperspell API.
 
-Follow instructions in [index.md](sdks/index.md) to implement the chosen pattern.
+Follow instructions in [index.md](search/index.md) to implement the chosen pattern.
 
 ### Step 8: Wrapping Up
 

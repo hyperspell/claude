@@ -15,8 +15,8 @@ If you want Hyperspell to directly answer questions (without going through your 
 
 Make sure you have:
 1. The Vercel AI SDK installed (`npm i ai`)
-2. Hyperspell server actions or API routes set up (see [frameworks](../frameworks/index.md) guides)
-3. Zod installed (`npm i zod`)
+2. Zod installed (`npm i zod`)
+3. A way to get the current user ID from your auth system (the examples below show this pattern)
 
 ## Create the Memories Tool
 
@@ -28,49 +28,33 @@ Find the appropriate place to add tools in your project. This could be:
 Add the following code:
 
 ```typescript
-// lib/tools/memories.ts (or wherever you keep tools)
-import { tool } from 'ai';
-import { z } from 'zod';
-
-// Option 1: If using server actions (Next.js App Router)
-import { searchMemories } from '@/app/actions/hyperspell';
-
-export const memories = tool({
-  description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
-  inputSchema: z.object({
-    query: z.string().describe('The search query. Formulate it as a question for best results.'),
-  }),
-  execute: async ({ query }) => {
-    const result = await searchMemories(query);
-    return result;
-  },
-});
-```
-
-Or if using API routes:
-
-```typescript
 // lib/tools/memories.ts
 import { tool } from 'ai';
 import { z } from 'zod';
+import Hyperspell from 'hyperspell';
 
-export const memories = tool({
-  description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
-  // IMPORTANT: starting from AI SDK 5.0, you MUST use inputSchema instead of parameters 
-  inputSchema: z.object({
-    query: z.string().describe('The search query. Formulate it as a question for best results.'),
-  }),
-  execute: async ({ query }) => {
-    // Call your API route
-    const response = await fetch('/api/hyperspell/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
-    });
-    const data = await response.json();
-    return data.answer ?? 'No relevant information found in memories.';
-  },
-});
+export function createMemoriesTool(userId: string) {
+  return tool({
+    description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
+    // IMPORTANT: Starting from AI SDK 5.0, you MUST use inputSchema instead of parameters
+    inputSchema: z.object({
+      query: z.string().describe('The search query. Formulate it as a question for best results.'),
+    }),
+    execute: async ({ query }) => {
+      const hyperspell = new Hyperspell({
+        apiKey: process.env.HYPERSPELL_API_KEY!,
+        userID: userId,
+      });
+
+      const response = await hyperspell.memories.search({
+        query,
+        answer: true,
+      });
+
+      return response.answer ?? 'No relevant information found in memories.';
+    },
+  });
+}
 ```
 
 ## Add the Tool to Your Agent
@@ -82,7 +66,10 @@ Find where you call `streamText` or `generateText` and add the memories tool:
 ```typescript
 import { streamText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { memories } from '@/lib/tools/memories';
+import { createMemoriesTool } from '@/lib/tools/memories';
+
+// Get userId from your auth system
+const memories = createMemoriesTool(userId);
 
 const result = await streamText({
   model: openai('gpt-4o'),
@@ -100,7 +87,9 @@ const result = await streamText({
 ```typescript
 import { generateText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { memories } from '@/lib/tools/memories';
+import { createMemoriesTool } from '@/lib/tools/memories';
+
+const memories = createMemoriesTool(userId);
 
 const result = await generateText({
   model: openai('gpt-4o'),
@@ -204,9 +193,11 @@ If you already have tools, add memories alongside them:
 
 ```typescript
 import { streamText, stepCountIs } from 'ai';
-import { memories } from '@/lib/tools/memories';
+import { createMemoriesTool } from '@/lib/tools/memories';
 import { calculator } from '@/lib/tools/calculator';
 import { webSearch } from '@/lib/tools/webSearch';
+
+const memories = createMemoriesTool(userId);
 
 streamText({
   model: openai('gpt-4o'),

@@ -23,24 +23,25 @@ Offer a multiple choice menu:
 - All of the above
 
 Based on their choice, follow the appropriate instructions:
-- Add memories → [add_memories.md](add_memories.md)
-- Upload files → [upload_files.md](upload_files.md)
-- List memories → [list_memories.md](list_memories.md)
+- Add memories → [add.md](add.md)
+- Upload files → [upload.md](upload.md)
+- List memories → [list.md](list.md)
 - All → Follow all three files in sequence
 
 ## Auth Setup for Direct Memory Operations
 
-Before implementing any operation, ensure the auth pattern is set up correctly based on the detected flow:
+Before implementing any operation, ensure the auth pattern is set up correctly:
 
-**FLOW C (Backend with Direct Memory):**
+**Backend apps (most common):**
 - Use API key from environment variable
-- Include `X-As-User` header with the user ID for each request
+- Pass the user ID to the SDK
 - No user token needed
 
-**FLOW D (Frontend-only):**
-- Need to fetch user token from external endpoint first
-- Use that token for Hyperspell API calls
-- See [frontend_only.md](../frameworks/frontend_only.md) for token setup
+**Frontend-only apps:**
+- Need to fetch user token from a backend endpoint first
+- Your backend calls Hyperspell's `/auth/user_token` endpoint to generate tokens
+- Use that token for Hyperspell API calls from the frontend
+- See the token endpoint examples in [oauth.md](../oauth.md) for how to create the backend endpoint
 
 ## TypeScript SDK Setup
 
@@ -49,13 +50,13 @@ For TypeScript/JavaScript projects, the Hyperspell SDK provides typed methods:
 ```typescript
 import Hyperspell from 'hyperspell';
 
-// For backend (FLOW C) - use API key with user ID
+// For backend - use API key with user ID
 const hyperspell = new Hyperspell({
-  apiKey: process.env.HYPERSPELL_API_KEY,
+  apiKey: process.env.HYPERSPELL_API_KEY!,
   userID: userId  // The ID of the user whose memories these are
 });
 
-// For frontend (FLOW D) - use user token
+// For frontend - use user token
 const hyperspell = new Hyperspell({
   apiKey: userToken  // Token fetched from your backend or auth provider
 });
@@ -67,14 +68,15 @@ For Python projects:
 
 ```python
 from hyperspell import Hyperspell
+import os
 
-# For backend (FLOW C) - use API key with user ID
+# For backend - use API key with user ID
 hyperspell = Hyperspell(
     api_key=os.environ["HYPERSPELL_API_KEY"],
     user_id=user_id  # The ID of the user whose memories these are
 )
 
-# For frontend/scripts (FLOW D) - use user token
+# For frontend/scripts - use user token
 hyperspell = Hyperspell(api_key=user_token)
 ```
 
