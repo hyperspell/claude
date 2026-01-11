@@ -9,7 +9,7 @@ Use this tool-based approach when:
 - You want the AI to decide when to search memories
 - You have other tools alongside Hyperspell
 
-If you want Hyperspell to directly answer questions (without going through your AI), see [raw_api.md](raw_api.md) for the direct search patterns.
+If you want to use the search helper directly without wrapping it in a tool, see [index.md](index.md) for examples.
 
 ## Prerequisites
 
@@ -18,21 +18,18 @@ Make sure you have:
 2. Zod installed (`npm i zod`)
 3. A way to get the current user ID from your auth system (the examples below show this pattern)
 
-## Create the Memories Tool
+## Create the Tool Helper
 
-Find the appropriate place to add tools in your project. This could be:
-- A dedicated tools file (e.g., `lib/tools.ts` or `tools/index.ts`)
-- The same file that makes the `streamText`/`generateText` call
-- A tools directory if you have multiple tools
-
-Add the following code:
+Add this tool helper to your Hyperspell utilities file (e.g., `lib/hyperspell.ts`), alongside the `searchMemories` helper from Step 1 in [index.md](index.md):
 
 ```typescript
-// lib/tools/memories.ts
+// lib/hyperspell.ts
 import { tool } from 'ai';
 import { z } from 'zod';
-import Hyperspell from 'hyperspell';
 
+// ... searchMemories helper from index.md ...
+
+// Tool helper - wraps searchMemories for use with Vercel AI SDK
 export function createMemoriesTool(userId: string) {
   return tool({
     description: 'Search connected memories for information including emails, documents, and messages. ALWAYS use this tool before answering questions that might require information from the user\'s personal or work data.',
@@ -41,16 +38,7 @@ export function createMemoriesTool(userId: string) {
       query: z.string().describe('The search query. Formulate it as a question for best results.'),
     }),
     execute: async ({ query }) => {
-      const hyperspell = new Hyperspell({
-        apiKey: process.env.HYPERSPELL_API_KEY!,
-        userID: userId,
-      });
-
-      const response = await hyperspell.memories.search({
-        query,
-        answer: true,
-      });
-
+      const response = await searchMemories(userId, query, { answer: true });
       return response.answer ?? 'No relevant information found in memories.';
     },
   });
@@ -66,7 +54,7 @@ Find where you call `streamText` or `generateText` and add the memories tool:
 ```typescript
 import { streamText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { createMemoriesTool } from '@/lib/tools/memories';
+import { createMemoriesTool } from '@/lib/hyperspell';
 
 // Get userId from your auth system
 const memories = createMemoriesTool(userId);
@@ -87,7 +75,7 @@ const result = await streamText({
 ```typescript
 import { generateText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { createMemoriesTool } from '@/lib/tools/memories';
+import { createMemoriesTool } from '@/lib/hyperspell';
 
 const memories = createMemoriesTool(userId);
 
@@ -101,44 +89,22 @@ const result = await generateText({
 });
 ```
 
-## Full Example: Chat API Route
+## Full Example: Integrating into Existing Chat
 
-Here's a complete example for a Next.js App Router API route:
+Here's how to add the memories tool to an existing chat handler:
 
 ```typescript
-// app/api/chat/route.ts
-import { streamText, stepCountIs, tool } from 'ai';
+// In your existing chat handler (e.g., app/api/chat/route.ts)
+import { streamText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { z } from 'zod';
-import Hyperspell from 'hyperspell';
-import { auth } from '@/lib/auth';
+import { createMemoriesTool } from '@/lib/hyperspell';
 
 export async function POST(req: Request) {
-  const session = await auth();
-  const userId = session?.user?.id || 'anonymous';
+  const userId = ... // Get the current user ID from your auth system
 
   const { messages } = await req.json();
 
-  // Create the memories tool with user context
-  const memories = tool({
-    description: 'Search connected memories for information. Use this before answering questions that might require personal or work data.',
-    inputSchema: z.object({
-      query: z.string().describe('The search query as a question'),
-    }),
-    execute: async ({ query }) => {
-      const hyperspell = new Hyperspell({
-        apiKey: process.env.HYPERSPELL_API_KEY!,
-        userID: userId,
-      });
-
-      const response = await hyperspell.memories.search({
-        query,
-        answer: true,
-      });
-
-      return response.answer ?? 'No relevant information found in memories.';
-    },
-  });
+  const memories = createMemoriesTool(userId);
 
   const result = streamText({
     model: openai('gpt-4o'),
@@ -193,7 +159,8 @@ If you already have tools, add memories alongside them:
 
 ```typescript
 import { streamText, stepCountIs } from 'ai';
-import { createMemoriesTool } from '@/lib/tools/memories';
+import { openai } from '@ai-sdk/openai';
+import { createMemoriesTool } from '@/lib/hyperspell';
 import { calculator } from '@/lib/tools/calculator';
 import { webSearch } from '@/lib/tools/webSearch';
 

@@ -1,64 +1,24 @@
 # Search Integration
 
-This guide covers how to query memories from Hyperspell in your application.
+This guide covers how to integrate Hyperspell's memory search into your application.
 
-## Two Integration Patterns
+**Important:** Create a **search helper function**, then integrate it into your existing AI calls. Do NOT create new API endpoints.
 
-### Pattern 1: Hyperspell as a Tool (Most Common)
+## Step 1: Create the Search Helper
 
-Wrap the memory search in a tool that you pass to your AI/LLM. The AI decides when to search memories.
-
-```
-User Question → Your AI (with Hyperspell tool) → AI calls tool when needed → Response
-```
-
-**When to use:**
-- Your agent already uses tools/function calling
-- You want the AI to decide when memory context is relevant
-- You have other tools alongside memories
-
-**Implementation:** See [vercel_ai.md](vercel_ai.md) or the adaptation guidance below.
-
-### Pattern 2: Direct Memory Search
-
-Call the memory search API directly and use the results in your application.
-
-**With `answer: true`:**
-- Hyperspell's AI generates an answer based on the user's memories
-- Returns both the answer AND source documents
-- Good for: Simple Q&A bots without other tools
-
-**With `answer: false`:**
-- Returns only the relevant source documents/highlights
-- You inject this context into your own AI call
-- Good for: Custom RAG pipelines, non-AI uses
-
-```
-User Question → Hyperspell Search → Context/Answer → Your app
-```
-
-**Implementation:** See [raw_api.md](raw_api.md).
-
-## Choosing the Right Pattern
-
-**Use Pattern 1 (Tool) if:**
-- Your agent already has tools → **Definitely use Pattern 1**
-- You need the AI to intelligently decide when to search
-- You have multiple tools the AI should coordinate
-
-**Use Pattern 2 (Direct) if:**
-- Simple Q&A bot with no other tools
-- You want Hyperspell to fully handle the AI response (`answer: true`)
-- You need raw context for custom processing (`answer: false`)
-
-## Basic Search Code
-
-This is the core search call - use it wherever your backend logic lives:
+First, add the search helper to your Hyperspell utilities file (e.g., `lib/hyperspell.ts`):
 
 ```typescript
+// lib/hyperspell.ts
 import Hyperspell from 'hyperspell';
 
-async function searchMemories(userId: string, query: string) {
+export async function searchMemories(
+  userId: string,
+  query: string,
+  options: { answer?: boolean } = {}
+) {
+  const { answer = true } = options;
+
   const hyperspell = new Hyperspell({
     apiKey: process.env.HYPERSPELL_API_KEY!,
     userID: userId,
@@ -66,7 +26,7 @@ async function searchMemories(userId: string, query: string) {
 
   const response = await hyperspell.memories.search({
     query,
-    answer: true,  // or false for raw context
+    answer,
   });
 
   return response;
@@ -74,65 +34,51 @@ async function searchMemories(userId: string, query: string) {
 ```
 
 ```python
-from hyperspell import Hyperspell
+# lib/hyperspell.py
 import os
+from hyperspell import Hyperspell
 
-def search_memories(user_id: str, query: str):
-    hyperspell = Hyperspell(
+def search_memories(user_id: str, query: str, answer: bool = True):
+    client = Hyperspell(
         api_key=os.environ["HYPERSPELL_API_KEY"],
         user_id=user_id
     )
 
-    response = hyperspell.memories.search(
+    response = client.memories.search(
         query=query,
-        answer=True  # or False for raw context
+        answer=answer
     )
 
     return response
 ```
 
-## SDK Routing
+## Step 2: Integrate with Your AI
 
-Based on your AI SDK:
+Now integrate the search helper based on how your app uses AI:
 
-- **Vercel AI SDK** (`ai` package) → [vercel_ai.md](vercel_ai.md)
-- **No SDK / Direct API** → [raw_api.md](raw_api.md)
-- **Other SDKs** (LangChain, LlamaIndex, OpenAI, Anthropic) → See below
+---
 
-## Adaptation Guidance for Other SDKs
+### If using Vercel AI SDK
 
-The pattern is the same for any SDK: create a tool that calls `hyperspell.memories.search()`.
+See [vercel_ai.md](vercel_ai.md) for detailed instructions on creating a tool wrapper and adding it to `streamText`/`generateText`.
 
-### LangChain
+---
 
-```typescript
-import { DynamicTool } from 'langchain/tools';
-import Hyperspell from 'hyperspell';
+### If using OpenAI client directly
 
-function createMemoriesTool(userId: string) {
-  return new DynamicTool({
-    name: 'search_memories',
-    description: 'Search user memories including emails, documents, and messages.',
-    func: async (query: string) => {
-      const hyperspell = new Hyperspell({
-        apiKey: process.env.HYPERSPELL_API_KEY!,
-        userID: userId,
-      });
-      const response = await hyperspell.memories.search({ query, answer: true });
-      return response.answer ?? 'No relevant information found.';
-    },
-  });
-}
-```
-
-### OpenAI Function Calling
+Add Hyperspell as a function/tool in your OpenAI calls:
 
 ```typescript
+import OpenAI from 'openai';
+import { searchMemories } from '@/lib/hyperspell';
+
+const openai = new OpenAI();
+
 const tools = [{
-  type: 'function',
+  type: 'function' as const,
   function: {
     name: 'search_memories',
-    description: 'Search user memories including emails, documents, and messages',
+    description: 'Search user memories including emails, documents, and messages. Use before answering questions about personal or work data.',
     parameters: {
       type: 'object',
       properties: {
@@ -143,24 +89,40 @@ const tools = [{
   },
 }];
 
-// In your tool handler:
-if (toolCall.function.name === 'search_memories') {
-  const { query } = JSON.parse(toolCall.function.arguments);
-  const hyperspell = new Hyperspell({
-    apiKey: process.env.HYPERSPELL_API_KEY!,
-    userID: userId,
-  });
-  const response = await hyperspell.memories.search({ query, answer: true });
-  return response.answer;
+// In your chat handler
+const response = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  tools,
+});
+
+// Handle tool calls
+if (response.choices[0].message.tool_calls) {
+  for (const toolCall of response.choices[0].message.tool_calls) {
+    if (toolCall.function.name === 'search_memories') {
+      const { query } = JSON.parse(toolCall.function.arguments);
+      const result = await searchMemories(userId, query);
+      // Add tool result to messages and continue conversation
+    }
+  }
 }
 ```
 
-### Anthropic Claude
+---
+
+### If using Anthropic client directly
+
+Add Hyperspell as a tool in your Anthropic calls:
 
 ```typescript
+import Anthropic from '@anthropic-ai/sdk';
+import { searchMemories } from '@/lib/hyperspell';
+
+const anthropic = new Anthropic();
+
 const tools = [{
   name: 'search_memories',
-  description: 'Search user memories including emails, documents, and messages',
+  description: 'Search user memories including emails, documents, and messages. Use before answering questions about personal or work data.',
   input_schema: {
     type: 'object',
     properties: {
@@ -170,16 +132,58 @@ const tools = [{
   },
 }];
 
-// In your tool handler:
-if (toolUse.name === 'search_memories') {
-  const { query } = toolUse.input;
-  const hyperspell = new Hyperspell({
-    apiKey: process.env.HYPERSPELL_API_KEY!,
-    userID: userId,
-  });
-  const response = await hyperspell.memories.search({ query, answer: true });
-  return response.answer;
+// In your chat handler
+const response = await anthropic.messages.create({
+  model: 'claude-sonnet-4-20250514',
+  messages,
+  tools,
+});
+
+// Handle tool use
+for (const block of response.content) {
+  if (block.type === 'tool_use' && block.name === 'search_memories') {
+    const result = await searchMemories(userId, block.input.query);
+    // Add tool result to messages and continue conversation
+  }
 }
+```
+
+---
+
+### If using LangChain
+
+```typescript
+import { DynamicTool } from 'langchain/tools';
+import { searchMemories } from '@/lib/hyperspell';
+
+function createMemoriesTool(userId: string) {
+  return new DynamicTool({
+    name: 'search_memories',
+    description: 'Search user memories including emails, documents, and messages.',
+    func: async (query: string) => {
+      const response = await searchMemories(userId, query);
+      return response.answer ?? 'No relevant information found.';
+    },
+  });
+}
+```
+
+---
+
+### If there are no existing AI calls
+
+If your app doesn't have any AI/LLM integration yet, just create the search helper for now.
+
+Display this message to the user:
+
+```
+I've created the searchMemories helper in lib/hyperspell.ts. You can use it to search through connected memories:
+
+  const result = await searchMemories(userId, "What did John say about the deadline?");
+  // result.answer - AI-generated answer from memories (when answer: true)
+  // result.documents - source documents that matched the query
+
+When you add AI/chat functionality later, you can integrate this as a tool so your AI can automatically search memories when relevant.
 ```
 
 ## Tool Description Best Practices
