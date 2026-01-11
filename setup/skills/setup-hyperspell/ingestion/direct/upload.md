@@ -51,7 +51,12 @@ interface UploadFileParams {
   metadata?: Record<string, string | number | boolean>;
 }
 
-export async function uploadFile({ userId, filePath, collection, metadata }: UploadFileParams) {
+export async function uploadFile({
+  userId,
+  filePath,
+  collection,
+  metadata,
+}: UploadFileParams) {
   const client = new Hyperspell({
     apiKey: process.env.HYPERSPELL_API_KEY!,
     userID: userId,
@@ -60,7 +65,7 @@ export async function uploadFile({ userId, filePath, collection, metadata }: Upl
   const response = await client.memories.upload({
     file: fs.createReadStream(filePath),
     collection,
-    metadata,
+    metadata: metadata ? JSON.stringify(metadata) : undefined,
   });
 
   return response;

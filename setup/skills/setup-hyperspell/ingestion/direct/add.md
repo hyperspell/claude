@@ -46,7 +46,13 @@ interface AddMemoryParams {
   metadata?: Record<string, string | number | boolean>;
 }
 
-export async function addMemory({ userId, text, title, collection, metadata }: AddMemoryParams) {
+export async function addMemory({
+  userId,
+  text,
+  title,
+  collection,
+  metadata,
+}: AddMemoryParams) {
   const client = new Hyperspell({
     apiKey: process.env.HYPERSPELL_API_KEY!,
     userID: userId,

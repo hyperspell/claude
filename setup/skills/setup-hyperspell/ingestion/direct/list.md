@@ -48,21 +48,39 @@ The SDK provides an async iterator for easy pagination:
 ```typescript
 import Hyperspell from 'hyperspell';
 
+type MemorySource =
+  | 'collections'
+  | 'vault'
+  | 'web_crawler'
+  | 'notion'
+  | 'slack'
+  | 'google_calendar'
+  | 'reddit'
+  | 'box'
+  | 'google_drive'
+  | 'airtable'
+  | 'gmail';
+
 interface ListMemoriesParams {
   userId: string;
   collection?: string;
-  source?: string;
+  source?: MemorySource;
   size?: number;
 }
 
-export async function listMemories({ userId, collection, source, size }: ListMemoriesParams) {
+export async function listMemories({
+  userId,
+  collection,
+  source,
+  size,
+}: ListMemoriesParams) {
   const client = new Hyperspell({
     apiKey: process.env.HYPERSPELL_API_KEY!,
     userID: userId,
   });
 
   const memories = [];
-  for await (const memory of client.memories.list({ collection, source, size })) {
+  for await (const memory of client.memories.list({ collection, source, size } as any)) {
     memories.push(memory);
   }
 
