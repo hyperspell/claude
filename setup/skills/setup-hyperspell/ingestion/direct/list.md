@@ -90,161 +90,51 @@ def list_memories(user_id: str, collection: str = None, source: str = None, size
     return memories
 ```
 
-## Building a Memories Admin UI
+## Common Use Cases
 
-### React Component Example
-
-```tsx
-import { useState, useEffect } from 'react';
-
-interface Memory {
-  resource_id: string;
-  title: string;
-  source: string;
-  metadata: {
-    created_at: string;
-    status: string;
-  };
-}
-
-export function MemoriesList({ userId }: { userId: string }) {
-  const [memories, setMemories] = useState<Memory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
-
-  async function fetchMemories(nextCursor?: string) {
-    setLoading(true);
-    const params = new URLSearchParams({ size: '20' });
-    if (nextCursor) params.set('cursor', nextCursor);
-
-    const response = await fetch(`/api/memories?${params}`);
-    const data = await response.json();
-
-    if (nextCursor) {
-      setMemories(prev => [...prev, ...data.items]);
-    } else {
-      setMemories(data.items);
-    }
-    setCursor(data.next_cursor);
-    setHasMore(!!data.next_cursor);
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    fetchMemories();
-  }, []);
-
-  if (loading && memories.length === 0) return <div>Loading...</div>;
-
-  return (
-    <div>
-      <h2>Your Memories</h2>
-      <ul>
-        {memories.map((memory) => (
-          <li key={memory.resource_id}>
-            <strong>{memory.title || 'Untitled'}</strong>
-            <span>Source: {memory.source}</span>
-            <span>{new Date(memory.metadata.created_at).toLocaleDateString()}</span>
-          </li>
-        ))}
-      </ul>
-      {hasMore && (
-        <button onClick={() => fetchMemories(cursor!)} disabled={loading}>
-          {loading ? 'Loading...' : 'Load More'}
-        </button>
-      )}
-    </div>
-  );
-}
-```
-
-### API Route Handler
+### List all memories for a user
 
 ```typescript
-// Next.js App Router: app/api/memories/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import Hyperspell from 'hyperspell';
-
-export async function GET(request: NextRequest) {
-  const userId = ... // Write code to get the ID of the currently logged in user here — you might have to import other modules
-
-  const { searchParams } = new URL(request.url);
-  const collection = searchParams.get('collection') || undefined;
-  const cursor = searchParams.get('cursor') || undefined;
-  const size = parseInt(searchParams.get('size') || '20');
-
-  const client = new Hyperspell({
-    apiKey: process.env.HYPERSPELL_API_KEY!,
-    userID: userId,
-  });
-
-  // For paginated results, use the raw list with cursor
-  const response = await fetch(
-    `https://api.hyperspell.com/memories/list?${new URLSearchParams({
-      ...(collection && { collection }),
-      ...(cursor && { cursor }),
-      size: String(size),
-    })}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${process.env.HYPERSPELL_API_KEY}`,
-        'X-As-User': userId,
-      },
-    }
-  );
-
-  const data = await response.json();
-  return NextResponse.json(data);
-}
+const memories = await listMemories({
+  userId: currentUser.id,
+});
+console.log(`Found ${memories.length} memories`);
 ```
 
-## Filtering by Collection
-
-Filter memories by their collection to show specific types:
+### List memories by collection
 
 ```typescript
-// Show only conversation memories
 const conversations = await listMemories({
-  userId,
+  userId: currentUser.id,
   collection: 'conversations',
 });
-
-// Show only document uploads
-const documents = await listMemories({
-  userId,
-  collection: 'documents',
-});
 ```
 
-## Filtering by Source
-
-Filter by where memories originated:
+### List memories by source
 
 ```typescript
-// Show only manually added memories
-const customMemories = await listMemories({
-  userId,
-  source: 'collections',
-});
-
 // Show only Gmail memories
 const gmailMemories = await listMemories({
-  userId,
+  userId: currentUser.id,
   source: 'gmail',
 });
 
 // Show only Slack memories
 const slackMemories = await listMemories({
-  userId,
+  userId: currentUser.id,
   source: 'slack',
+});
+
+// Show only manually added memories
+const customMemories = await listMemories({
+  userId: currentUser.id,
+  source: 'collections',
 });
 ```
 
 ## Integration Notes
 
-- Use cursor-based pagination for large memory collections
+- Call this helper from your existing code (e.g., when displaying a user's data, in admin dashboards)
 - The SDK's async iterator handles pagination automatically
-- The `source` filter is useful for building tabbed or filtered views
-- Consider caching results for frequently accessed lists
-- For search functionality, use the `/memories/query` endpoint instead
+- Use `collection` and `source` filters to organize different types of memories
+- For search functionality, use the search API instead (see the search/ folder)

@@ -2,6 +2,8 @@
 
 This guide helps you add memories programmatically to Hyperspell - useful for tracking conversations, uploading documents, or ingesting data from custom sources.
 
+**Important:** The guides below create **internal helper functions** that you call from your existing code. Do NOT create new API endpoints for these operations - instead, call these helpers from wherever you need them (e.g., after a chat response, when processing an uploaded file, in a background job). If there are no obvious places to integrate these helpers, then once you have completed the entire setup flow, then at the end, provide some next steps for the user about where these helpers are located and when/how to use them.
+
 ## Available Operations
 
 Display the following to the user:

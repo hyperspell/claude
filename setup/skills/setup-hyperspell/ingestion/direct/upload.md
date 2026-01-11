@@ -90,95 +90,57 @@ def upload_file(user_id: str, file_path: str, collection: str = None, metadata: 
     return response
 ```
 
-## Framework-Specific Examples
+## Common Use Cases
 
-### Next.js API Route (App Router)
+### Upload from existing file upload handler
 
-```typescript
-// app/api/upload/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import Hyperspell from 'hyperspell';
-
-export async function POST(request: NextRequest) {
-  const userId = ... // Write code to get the ID of the currently logged in user here — you might have to import other modules
-
-  const formData = await request.formData();
-  const file = formData.get('file') as File;
-
-  if (!file) {
-    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-  }
-
-  const client = new Hyperspell({
-    apiKey: process.env.HYPERSPELL_API_KEY!,
-    userID: userId,
-  });
-
-  const result = await client.memories.upload({
-    file: Buffer.from(await file.arrayBuffer()),
-  });
-
-  return NextResponse.json(result);
-}
-```
-
-### Express.js with Multer
+If your app already has a file upload endpoint, call the helper from there:
 
 ```typescript
-import express from 'express';
-import multer from 'multer';
-import Hyperspell from 'hyperspell';
-
-const upload = multer({ storage: multer.memoryStorage() });
-
-app.post('/api/upload', upload.single('file'), async (req, res) => {
-  const userId = ... // Write code to get the ID of the currently logged in user here — you might have to import other modules
-
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file provided' });
-  }
-
-  const client = new Hyperspell({
-    apiKey: process.env.HYPERSPELL_API_KEY!,
-    userID: userId,
-  });
-
-  const result = await client.memories.upload({
-    file: req.file.buffer,
-  });
-
-  res.json(result);
+// In your existing upload handler
+const result = await uploadFile({
+  userId: currentUser.id,
+  filePath: savedFilePath,
+  collection: 'documents',
 });
 ```
 
-### FastAPI
+### Process files from a directory
 
-```python
-from fastapi import FastAPI, UploadFile
-from hyperspell import Hyperspell
-import os
+```typescript
+import fs from 'fs';
+import path from 'path';
 
-app = FastAPI()
+async function processDocumentsFolder(userId: string, folderPath: string) {
+  const files = fs.readdirSync(folderPath);
 
-@app.post("/api/upload")
-async def upload_document(file: UploadFile):
-    user_id = ...  # Write code to get the ID of the currently logged in user here — you might have to import other modules
+  for (const filename of files) {
+    await uploadFile({
+      userId,
+      filePath: path.join(folderPath, filename),
+      collection: 'imported_docs',
+    });
+  }
+}
+```
 
-    client = Hyperspell(
-        api_key=os.environ["HYPERSPELL_API_KEY"],
-        user_id=user_id
-    )
+### Upload with metadata
 
-    contents = await file.read()
-    response = client.memories.upload(file=contents)
-
-    return response
+```typescript
+await uploadFile({
+  userId: currentUser.id,
+  filePath: '/path/to/report.pdf',
+  collection: 'reports',
+  metadata: {
+    department: 'engineering',
+    year: 2024,
+  },
+});
 ```
 
 ## Integration Notes
 
+- Call this helper from your existing code (e.g., after saving a user-uploaded file, during a batch import job)
 - Files are processed asynchronously - they may not be immediately searchable
 - The `status` field indicates processing state: `pending`, `processing`, `completed`, or `failed`
 - Use the returned `resource_id` to track or reference the uploaded file
-- Set appropriate file size limits in your upload endpoints
-- Consider adding progress indicators for large file uploads
