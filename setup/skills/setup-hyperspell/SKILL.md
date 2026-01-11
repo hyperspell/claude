@@ -8,8 +8,6 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, TodoWrite, AskUserQuestion
 
 ## Instructions
 
-**IMPORTANT: The flow labels (A, B, C, D) are internal implementation details. NEVER mention "Flow A", "Flow B", etc. to the user.** When communicating with the user, explain what you're doing in plain English (e.g., "I'll set up a token endpoint on your backend and add a connect button to your frontend" instead of "Using Flow A").
-
 Copy this checklist and track your progress:
 
 ```
@@ -18,10 +16,9 @@ Implementation Progress:
 - [ ] Step 2: Configure the API Key
 - [ ] Step 3: Detect Project Type
 - [ ] Step 4: Choose Memory Ingestion Method
-- [ ] Step 5: Determine Auth Flow
-- [ ] Step 6: Set Up Memory Ingestion
-- [ ] Step 7: Set Up Memory Search
-- [ ] Step 8: Wrapping Up
+- [ ] Step 5: Set Up Memory Ingestion
+- [ ] Step 6: Set Up Memory Search
+- [ ] Step 7: Wrapping Up
 ```
 
 Run the following command and note the output as $START_TIME:
@@ -81,35 +78,52 @@ Ask the user with this multiple choice:
 - **Let users connect their accounts** - Users authorize their Gmail, Slack, etc. and Hyperspell automatically ingests their data
 - **Add memories directly** - You programmatically add memories via API (file uploads, conversation tracking, etc.)
 
-### Step 5: Determine Auth Flow
+### Step 5: Set Up Memory Ingestion
 
-Based on the user's choice in Step 4 and the detection results from Step 3, determine which auth flow to use:
+Based on the user's choice in Step 4 and the detection results from Step 3, set up the appropriate ingestion method.
+
+---
 
 **If user chose "Let users connect their accounts" (OAuth):**
-- If repo has a frontend (Monorepo/Fullstack or Frontend-only with backend endpoint): **FLOW A**
-  - Backend creates endpoint for user tokens
-  - Frontend calls backend, then redirects to connect.hyperspell.com
-- If repo is backend-only: **FLOW B**
-  - Backend generates tokens and serves/redirects to connect page
+
+The OAuth flow requires two pieces:
+1. A **backend endpoint** that generates user tokens (using your API key)
+2. A **frontend** that redirects users to `connect.hyperspell.com` with that token
+
+Follow the instructions in [oauth.md](ingestion/oauth.md) and implement what applies to this project:
+
+- **If the project has a backend:** Create the token endpoint using the framework examples in oauth.md.
+
+- **If the project has NO backend (frontend-only):** Display this message:
+  ```
+  The OAuth connect flow requires a backend endpoint to securely generate user tokens. You'll need to create an endpoint on a separate backend that calls Hyperspell's /auth/user_token API, then have your frontend fetch from that endpoint.
+  ```
+  Then continue with the frontend setup, leaving a TODO placeholder for the token endpoint URL.
+
+- **If the project has a frontend:** Create the connect button component using the React example in oauth.md.
+
+- **If the project has NO frontend (backend-only):** Display this message:
+  ```
+  Since this is a backend-only project, you'll need to redirect users to the connect page from your external frontend. The token endpoint is ready - your frontend should fetch a token from it, then redirect to: https://connect.hyperspell.com?token={token}&redirect_uri={returnUrl}
+  ```
+
+---
 
 **If user chose "Add memories directly" (Programmatic):**
-- If repo has a backend: **FLOW C**
-  - Use API key with `X-As-User` header (simplest)
-- If repo is frontend-only: **FLOW D**
-  - Need external token endpoint (Clerk/Auth0 or separate backend)
 
-### Step 6: Set Up Memory Ingestion
+- **If the project has a backend:** Follow the instructions in [index.md](ingestion/direct/index.md) to set up memory operations. Use the SDK with your API key and pass the user ID directly.
 
-**For OAuth flows (FLOW A or B):**
-Follow the instructions in [oauth.md](ingestion/oauth.md) to:
-1. Create a token endpoint on your backend
-2. Add the connect button to your frontend (or redirect from backend for backend-only projects)
+- **If the project has NO backend (frontend-only):** Display this message:
+  ```
+  Adding memories directly from a frontend requires a backend endpoint to securely make Hyperspell API calls. You'll need to either:
+  1. Create a backend endpoint that proxies memory operations, OR
+  2. Create a backend endpoint that generates user tokens (see oauth.md for examples)
+  ```
+  Then follow [index.md](ingestion/direct/index.md), noting that the user will need to set up the backend piece separately.
 
-**For Direct memory flows (FLOW C or D):**
-1. Follow instructions in [index.md](ingestion/direct/index.md) to set up memory operations
-2. If frontend-only, you'll need a backend endpoint to generate user tokens - see the token endpoint examples in [oauth.md](ingestion/oauth.md)
+---
 
-### Step 7: Set Up Memory Search (SDK Integration)
+### Step 6: Set Up Memory Search (SDK Integration)
 
 Display the following message:
 
@@ -143,7 +157,7 @@ How would you like to integrate Hyperspell's memory search?
 
 Follow instructions in [index.md](search/index.md) to implement the chosen pattern.
 
-### Step 8: Wrapping Up
+### Step 7: Wrapping Up
 
 Run the following command:
 
@@ -160,14 +174,3 @@ Congratulations! You've successfully integrated Hyperspell in just <DURATION> mi
 
 This is just the beginning of your journey with Hyperspell. As your project grows, Hyperspell grows with you. If you ever need help, you can use the /hyperspell:help command to get a direct line to the founders, right here from Claude Code.
 ```
-
-## Auth Flow Reference (Internal Only - Do Not Share With User)
-
-| Flow | Scenario | Auth Method |
-|------|----------|-------------|
-| A | Monorepo/Fullstack + OAuth | Backend token endpoint → Frontend connect button |
-| B | Backend-only + OAuth | Backend token endpoint → Serve connect page |
-| C | Backend + Direct | API key + X-As-User header |
-| D | Frontend-only | External token endpoint required |
-
-Remember: These labels are for your internal tracking only. Explain the approach to users in plain terms.
