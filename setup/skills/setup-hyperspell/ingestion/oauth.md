@@ -248,15 +248,16 @@ export function SettingsPage() {
 }
 ```
 
-### Button Placement
+### Button Placement (Required)
 
-Ask the user where they'd like to place the button. Common locations:
+After creating the button component, you MUST ask the user where they want to place it. Use a multiple choice question with these options:
 - Settings page
 - User profile section
 - Onboarding flow
 - Sidebar
+- Other (let user specify)
 
-Adapt the button styling to match the project's design system.
+Once the user responds, add the button to that location. Adapt the button styling to match the project's design system.
 
 ## After Connection
 
