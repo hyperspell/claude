@@ -37,7 +37,56 @@ Determine whether the hyperspell SDK is already installed. If not, install it:
 
 When the user invoked this command, they may have passed an API key as an argument: '$1'
 
-If that string is blank or not a valid API key, display this message and wait for the user to paste their key:
+If that string is blank or not a valid API key, offer to create a new Hyperspell account automatically:
+
+```
+I can create a Hyperspell account for you automatically, or you can provide an existing API key.
+
+Choose one:
+1. Create new account (recommended - takes 30 seconds)
+2. Use existing API key
+```
+
+#### Option 1: Create New Account (Bootstrap Flow)
+
+If the user chooses to create a new account:
+
+1. **Get their email address**: Ask "What's your email address?" (don't use multiple choice)
+
+2. **Get the app name**: Ask "What should we call this Hyperspell app?" and suggest the current project name if detectable.
+
+3. **Call the bootstrap API**: Make a POST request to `https://api.hyperspell.com/auth/bootstrap` with:
+   ```json
+   {
+     "email": "user@example.com",
+     "app_name": "Their App Name",
+     "user_agent": "Claude Code 1.0"
+   }
+   ```
+
+4. **Handle the response**: 
+   - **Success**: Tell the user "Verification code sent to your email! Please check your inbox."
+   - **Rate limited**: Show the error message and suggest manual signup at https://app.hyperspell.com/api-keys
+   - **Other error**: Fall back to manual signup flow (Option 2)
+
+5. **Get verification code**: Ask "Please enter the 6-digit code from the email:" (don't use multiple choice)
+
+6. **Verify the code**: Make a POST request to `https://api.hyperspell.com/auth/bootstrap/verify` with:
+   ```json
+   {
+     "verification_id": "from_step_3_response", 
+     "code": "123456"
+   }
+   ```
+
+7. **Handle verification response**:
+   - **Success**: Use the returned `api_key` and continue to step 3
+   - **Invalid code**: Let them retry (up to 3 times), then fall back to Option 2
+   - **Other error**: Fall back to Option 2
+
+#### Option 2: Use Existing API Key
+
+If bootstrap fails or the user chooses to use an existing key:
 
 ```
 Please paste your Hyperspell API key below.
@@ -47,7 +96,9 @@ If you don't have one yet, create one at https://app.hyperspell.com/api-keys
 
 Do NOT use a multiple choice menu for this step - just ask directly and let the user paste their key.
 
-Once you have the API key, put it in `.env.local` (or `.env` if `.env.local` doesn't exist) as `HYPERSPELL_API_KEY`.
+#### Save the API Key
+
+Once you have the API key (from either flow), put it in `.env.local` (or `.env` if `.env.local` doesn't exist) as `HYPERSPELL_API_KEY`.
 
 If this project contains an `.env.example`, also put a dummy key in there (`HYPERSPELL_API_KEY=hs-0-xxxxxxxxxxxxxxxxxxxxxx`)
 
