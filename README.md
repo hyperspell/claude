@@ -22,6 +22,23 @@
     ```
 3. Run the `/setup:hype [HYPERSPELL-API-KEY]` command to get started. 
 
+## Troubleshooting
+
+### "Unknown skill" after installing
+
+There's a known bug in Claude Code v2.x where plugins get added to `installed_plugins.json` but don't get auto-enabled in `settings.json`, so skills silently fail to load.
+
+**Fix:** Manually add the plugin to `~/.claude/settings.json`:
+
+```json
+"enabledPlugins": {
+    "setup@hyperspell": true
+}
+```
+
+Then re-run `/setup:hype [YOUR-API-KEY]`.
+
+See [claude-code#17832](https://github.com/anthropics/claude-code/issues/17832) for details.
 ## Development
 
 Clone this repo and add the marketplace to Claude with
