@@ -18,7 +18,8 @@ Implementation Progress:
 - [ ] Step 4: Choose Memory Ingestion Method
 - [ ] Step 5: Set Up Memory Ingestion
 - [ ] Step 6: Set Up Memory Search
-- [ ] Step 7: Wrapping Up
+- [ ] Step 7: Enable Auto-Trace (Optional)
+- [ ] Step 8: Wrapping Up
 ```
 
 Run the following command and note the output as $START_TIME:
@@ -160,7 +161,28 @@ How would you like to integrate Hyperspell's memory search?
 - "Direct search with AI answer" → Create the search helper only, call it with `answer: true` from existing code. Do NOT create a tool wrapper.
 - "Direct search for context only" → Create the search helper only, call it with `answer: false` from existing code. Do NOT create a tool wrapper.
 
-### Step 7: Wrapping Up
+### Step 7: Enable Auto-Trace (Optional)
+
+Display the following message:
+
+```
+Would you also like to enable automatic session tracing? This sends your
+Claude Code conversation transcripts to Hyperspell at the end of each session,
+enabling procedural memory extraction and mood capture.
+
+This is optional and can be enabled later with /setup:trace.
+```
+
+Ask the user with this multiple choice:
+- **Yes, enable auto-trace** - Send session transcripts to Hyperspell automatically
+- **Skip for now** - You can enable this later with /setup:trace
+
+If the user chose "Yes", follow the instructions in [SKILL.md](tracing/SKILL.md)
+to set up the auto-trace hook. Use the API key that was already configured in Step 2.
+
+If the user chose "Skip", proceed to Step 8.
+
+### Step 8: Wrapping Up
 
 Run the following command:
 
