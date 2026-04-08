@@ -20,7 +20,7 @@ Hyperspell is the memory & context layer for AI agents and apps. This Claude Cod
 
 ```
 
-When the user evoked this command, they may have passed the folowwing api key as an argument: '$1'
+When the user evoked this command, they may have passed the following api key as an argument: '$1'
 
-Use the **Setting up Hyperspell** skill to integrate hyperspell into this project. If the api key is present, use that during the skill step that configures the API key.
+Use the **Setting up Hyperspell** skill to integrate hyperspell into this project. If the api key is present, use that during the skill step that configures the API key. If no api key is provided, the skill will offer to create a new Hyperspell account automatically.
 
